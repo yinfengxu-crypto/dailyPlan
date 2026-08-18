@@ -1,33 +1,43 @@
 # syntax=docker/dockerfile:1
 
-# ---------- 构建阶段 ----------
-FROM node:22-slim AS builder
+# ===== 基础镜像：预装原生模块编译工具（better-sqlite3 需要） =====
+FROM node:22-slim AS base
 WORKDIR /app
 
-# 先复制依赖清单，充分利用 Docker 层缓存
-COPY package.json package-lock.json ./
-RUN npm ci
+# 预编译二进制下载失败时，node-gyp 可用这些工具从源码编译
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends python3 make g++ \
+    && rm -rf /var/lib/apt/lists/*
 
-# 复制源码并构建
+# 可选镜像加速（构建时通过 --build-arg 传入；中国大陆可换 npmmirror）
+ARG NPM_REGISTRY=https://registry.npmjs.org
+ARG SQLITE_MIRROR=
+RUN npm config set registry "$NPM_REGISTRY" \
+    && npm config set fetch-retries 5 \
+    && npm config set fetch-timeout 600000
+ENV npm_config_better_sqlite3_binary_host_mirror=$SQLITE_MIRROR
+
+# ===== 构建阶段 =====
+FROM base AS builder
+
+COPY package.json package-lock.json ./
+RUN npm ci --no-audit --no-fund
+
 COPY . .
 RUN npm run build
 
-# ---------- 运行阶段 ----------
-FROM node:22-slim AS runner
-WORKDIR /app
+# ===== 运行阶段 =====
+FROM base AS runner
 
 ENV NODE_ENV=production
 ENV PORT=3000
 
-# 只安装生产依赖（better-sqlite3 会在此下载对应平台的原生二进制）
 COPY package.json package-lock.json ./
-RUN npm ci --omit=dev && npm cache clean --force
+RUN npm ci --omit=dev --no-audit --no-fund && npm cache clean --force
 
-# 复制构建产物与配置
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/next.config.mjs ./next.config.mjs
 
-# SQLite 数据目录（用 volume 持久化）
 RUN mkdir -p /app/data
 VOLUME ["/app/data"]
 

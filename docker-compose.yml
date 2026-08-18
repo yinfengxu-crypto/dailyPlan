@@ -1,6 +1,13 @@
 services:
   dailyplan:
-    build: .
+    build:
+      context: .
+      args:
+        # 中国大陆加速：把下面两个值改为 npmmirror 镜像
+        NPM_REGISTRY: https://registry.npmjs.org
+        SQLITE_MIRROR: ""
+        # NPM_REGISTRY: https://registry.npmmirror.com
+        # SQLITE_MIRROR: https://registry.npmmirror.com/-/binary/better-sqlite3/
     container_name: dailyplan
     restart: unless-stopped
     ports:
