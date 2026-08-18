@@ -130,6 +130,26 @@ systemctl daemon-reload
 systemctl enable --now dailyplan
 ```
 
+## 方案三：GitHub Actions 自动构建（低配 VPS 推荐）
+
+> 适合内存小（1GB 及以下）的 VPS：在 GitHub 服务器上构建镜像，VPS 只拉取运行，不本地编译。
+
+1. 代码推送后，GitHub Actions 自动运行（仓库 Actions 页可看进度）：
+
+```bash
+git add -A && git commit -m "update" && git push
+```
+
+2. VPS 拉取运行（**不需要 docker build**）：
+
+```bash
+cd dailyPlan && git pull
+# 私有仓库首次需登录：docker login ghcr.io -u <用户名>
+docker compose -f docker-compose.ci.yml up -d
+```
+
+3. 更新：`docker compose -f docker-compose.ci.yml pull && docker compose -f docker-compose.ci.yml up -d`
+
 ---
 
 ## 环境变量

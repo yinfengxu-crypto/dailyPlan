@@ -1,0 +1,17 @@
+# 使用 GitHub Actions 预构建镜像的部署方式（VPS 无需编译）
+# 用法：docker compose -f docker-compose.ci.yml up -d
+services:
+  dailyplan:
+    image: ghcr.io/yinfengxu-crypto/dailyplan:latest
+    container_name: dailyplan
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - dailyplan-data:/app/data
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+
+volumes:
+  dailyplan-data:
