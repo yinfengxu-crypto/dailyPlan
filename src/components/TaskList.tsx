@@ -3,6 +3,7 @@
 import type { Filter, SortBy, Task, TaskPatch } from '../types';
 import { useI18n } from '../i18n';
 import TaskItem from './TaskItem';
+import SortSelect from './SortSelect';
 
 interface Props {
   tasks: Task[];
@@ -87,16 +88,15 @@ export default function TaskList({
             placeholder={t('search.placeholder')}
             aria-label={t('search.placeholder')}
           />
-          <select
-            className="sort-select"
+          <SortSelect
             value={sortBy}
-            onChange={e => onSortBy(e.target.value as SortBy)}
-            aria-label={t('sort.label')}
-          >
-            <option value="priority">{t('sort.priority')}</option>
-            <option value="time">{t('sort.time')}</option>
-            <option value="created">{t('sort.created')}</option>
-          </select>
+            onChange={onSortBy}
+            options={[
+              { value: 'priority', label: t('sort.priority') },
+              { value: 'time', label: t('sort.time') },
+              { value: 'created', label: t('sort.created') },
+            ]}
+          />
           {done > 0 && (
             <button className="clear-btn" onClick={onClearDone}>
               {t('filter.clearDone')}

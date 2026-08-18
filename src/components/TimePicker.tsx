@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useI18n } from '../i18n';
 import { useClickOutside } from '../hooks/useClickOutside';
+import Popover from './Popover';
 
 interface Props {
   value?: string;
@@ -102,52 +103,50 @@ export default function TimePicker({ value, onChange, placeholder }: Props) {
         )}
       </div>
 
-      {open && (
-        <div className="time-panel" role="dialog" aria-label={t('tp.choose')}>
-          <div className="time-panel-body">
-            <div className="time-col">
-              <div className="time-col-title">{t('tp.hour')}</div>
-              <div className="time-col-list" ref={hourRef}>
-                {hours.map(hh => (
-                  <button
-                    key={hh}
-                    type="button"
-                    data-value={hh}
-                    className={`time-cell ${hh === h ? 'selected' : ''}`}
-                    onClick={() => setDraft(`${hh}:${m || '00'}`)}
-                  >
-                    {hh}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="time-col">
-              <div className="time-col-title">{t('tp.minute')}</div>
-              <div className="time-col-list" ref={minRef}>
-                {minutes.map(mm => (
-                  <button
-                    key={mm}
-                    type="button"
-                    data-value={mm}
-                    className={`time-cell ${mm === m ? 'selected' : ''}`}
-                    onClick={() => setDraft(`${h || '00'}:${mm}`)}
-                  >
-                    {mm}
-                  </button>
-                ))}
-              </div>
+      <Popover triggerRef={ref} open={open} className="time-panel" role="dialog" ariaLabel={t('tp.choose')}>
+        <div className="time-panel-body">
+          <div className="time-col">
+            <div className="time-col-title">{t('tp.hour')}</div>
+            <div className="time-col-list" ref={hourRef}>
+              {hours.map(hh => (
+                <button
+                  key={hh}
+                  type="button"
+                  data-value={hh}
+                  className={`time-cell ${hh === h ? 'selected' : ''}`}
+                  onClick={() => setDraft(`${hh}:${m || '00'}`)}
+                >
+                  {hh}
+                </button>
+              ))}
             </div>
           </div>
-          <div className="time-panel-footer">
-            <button type="button" className="time-now" onClick={setNow}>
-              {t('tp.now')}
-            </button>
-            <button type="button" className="time-ok" onClick={confirm}>
-              {t('tp.ok')}
-            </button>
+          <div className="time-col">
+            <div className="time-col-title">{t('tp.minute')}</div>
+            <div className="time-col-list" ref={minRef}>
+              {minutes.map(mm => (
+                <button
+                  key={mm}
+                  type="button"
+                  data-value={mm}
+                  className={`time-cell ${mm === m ? 'selected' : ''}`}
+                  onClick={() => setDraft(`${h || '00'}:${mm}`)}
+                >
+                  {mm}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
-      )}
+        <div className="time-panel-footer">
+          <button type="button" className="time-now" onClick={setNow}>
+            {t('tp.now')}
+          </button>
+          <button type="button" className="time-ok" onClick={confirm}>
+            {t('tp.ok')}
+          </button>
+        </div>
+      </Popover>
     </div>
   );
 }

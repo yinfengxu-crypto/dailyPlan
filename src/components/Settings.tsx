@@ -4,6 +4,7 @@ import { useRef, useState } from 'react';
 import { THEMES, themeName } from '../themes';
 import { LOCALES, useI18n } from '../i18n';
 import { useClickOutside } from '../hooks/useClickOutside';
+import Popover from './Popover';
 
 interface Props {
   themeId: string;
@@ -42,25 +43,68 @@ export default function Settings({ themeId, onSelectTheme }: Props) {
         </svg>
       </button>
 
-      {open && (
-        <div className="settings-panel" role="dialog" aria-label={t('settings.title')}>
-          <section className="settings-section">
-            <h3>{t('settings.language')}</h3>
-            <div className="lang-grid">
-              {LOCALES.map(l => (
-                <button
-                  key={l.id}
-                  type="button"
-                  className={`lang-option ${locale === l.id ? 'active' : ''}`}
-                  onClick={() => setLocale(l.id)}
+      <Popover
+        triggerRef={ref}
+        open={open}
+        className="settings-panel"
+        role="dialog"
+        ariaLabel={t('settings.title')}
+        align="end"
+      >
+        <section className="settings-section">
+          <h3>{t('settings.language')}</h3>
+          <div className="lang-grid">
+            {LOCALES.map(l => (
+              <button
+                key={l.id}
+                type="button"
+                className={`lang-option ${locale === l.id ? 'active' : ''}`}
+                onClick={() => setLocale(l.id)}
+              >
+                <span className="lang-flag">{l.flag}</span>
+                <span className="lang-label">{l.label}</span>
+                {locale === l.id && (
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M20 6L9 17l-5-5" />
+                  </svg>
+                )}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        <div className="settings-divider" />
+
+        <section className="settings-section">
+          <h3>{t('settings.theme')}</h3>
+          <div className="swatches">
+            {THEMES.map(theme => (
+              <button
+                key={theme.id}
+                type="button"
+                className={`swatch-item ${themeId === theme.id ? 'active' : ''}`}
+                onClick={() => onSelectTheme(theme.id)}
+                aria-label={themeName(theme, locale)}
+                title={themeName(theme, locale)}
+              >
+                <span
+                  className="swatch-preview"
+                  style={{ background: `linear-gradient(135deg, ${theme.gradA}, ${theme.gradB})` }}
                 >
-                  <span className="lang-flag">{l.flag}</span>
-                  <span className="lang-label">{l.label}</span>
-                  {locale === l.id && (
+                  <span className="swatch-dot" style={{ background: theme.accent }} />
+                  {themeId === theme.id && (
                     <svg
+                      className="swatch-check"
                       viewBox="0 0 24 24"
                       fill="none"
-                      stroke="currentColor"
+                      stroke="#fff"
                       strokeWidth="3"
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -68,51 +112,13 @@ export default function Settings({ themeId, onSelectTheme }: Props) {
                       <path d="M20 6L9 17l-5-5" />
                     </svg>
                   )}
-                </button>
-              ))}
-            </div>
-          </section>
-
-          <div className="settings-divider" />
-
-          <section className="settings-section">
-            <h3>{t('settings.theme')}</h3>
-            <div className="swatches">
-              {THEMES.map(theme => (
-                <button
-                  key={theme.id}
-                  type="button"
-                  className={`swatch-item ${themeId === theme.id ? 'active' : ''}`}
-                  onClick={() => onSelectTheme(theme.id)}
-                  aria-label={themeName(theme, locale)}
-                  title={themeName(theme, locale)}
-                >
-                  <span
-                    className="swatch-preview"
-                    style={{ background: `linear-gradient(135deg, ${theme.gradA}, ${theme.gradB})` }}
-                  >
-                    <span className="swatch-dot" style={{ background: theme.accent }} />
-                    {themeId === theme.id && (
-                      <svg
-                        className="swatch-check"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="#fff"
-                        strokeWidth="3"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M20 6L9 17l-5-5" />
-                      </svg>
-                    )}
-                  </span>
-                  <span className="swatch-name">{themeName(theme, locale)}</span>
-                </button>
-              ))}
-            </div>
-          </section>
-        </div>
-      )}
+                </span>
+                <span className="swatch-name">{themeName(theme, locale)}</span>
+              </button>
+            ))}
+          </div>
+        </section>
+      </Popover>
     </div>
   );
 }

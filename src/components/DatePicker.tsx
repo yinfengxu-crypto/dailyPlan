@@ -12,6 +12,7 @@ import {
 } from '../utils/date';
 import { useI18n } from '../i18n';
 import { useClickOutside } from '../hooks/useClickOutside';
+import Popover from './Popover';
 
 interface Props {
   value: string;
@@ -27,13 +28,13 @@ export default function DatePicker({ value, onChange, markedDates }: Props) {
   const current = fromKey(value);
   const [view, setView] = useState(() => ({ y: current.getFullYear(), m: current.getMonth() }));
 
+  useClickOutside(ref, () => setOpen(false), open);
+
   const openPicker = () => {
     const c = fromKey(value);
     setView({ y: c.getFullYear(), m: c.getMonth() });
     setOpen(true);
   };
-
-  useClickOutside(ref, () => setOpen(false), open);
 
   const { main, week } = formatDate(value, locale);
   const today = todayKey();
@@ -95,59 +96,57 @@ export default function DatePicker({ value, onChange, markedDates }: Props) {
         </svg>
       </button>
 
-      {open && (
-        <div className="cal-panel" role="dialog" aria-label={t('cal.chooseDate')}>
-          <div className="cal-head">
-            <button type="button" onClick={() => shiftMonth(-1)} aria-label={t('cal.prevMonth')}>
-              ‹
-            </button>
-            <span>{monthTitle(view.y, view.m, locale)}</span>
-            <button type="button" onClick={() => shiftMonth(1)} aria-label={t('cal.nextMonth')}>
-              ›
-            </button>
-          </div>
-
-          <div className="cal-grid cal-week">
-            {weekLabels.map(w => (
-              <span key={w}>{w}</span>
-            ))}
-          </div>
-
-          <div className="cal-grid cal-days">
-            {cells.map((cell, i) =>
-              cell === null ? (
-                <span key={i} className="cal-empty" />
-              ) : (
-                <button
-                  type="button"
-                  key={i}
-                  className={`cal-day${cell.key === value ? ' selected' : ''}${
-                    cell.key === today ? ' today' : ''
-                  }`}
-                  onClick={() => {
-                    onChange(cell.key);
-                    setOpen(false);
-                  }}
-                >
-                  {cell.day}
-                  {markedDates?.has(cell.key) && <span className="cal-dot" />}
-                </button>
-              ),
-            )}
-          </div>
-
-          <button
-            type="button"
-            className="cal-today"
-            onClick={() => {
-              onChange(today);
-              setOpen(false);
-            }}
-          >
-            {t('cal.backToday')}
+      <Popover triggerRef={ref} open={open} className="cal-panel" role="dialog" ariaLabel={t('cal.chooseDate')}>
+        <div className="cal-head">
+          <button type="button" onClick={() => shiftMonth(-1)} aria-label={t('cal.prevMonth')}>
+            ‹
+          </button>
+          <span>{monthTitle(view.y, view.m, locale)}</span>
+          <button type="button" onClick={() => shiftMonth(1)} aria-label={t('cal.nextMonth')}>
+            ›
           </button>
         </div>
-      )}
+
+        <div className="cal-grid cal-week">
+          {weekLabels.map(w => (
+            <span key={w}>{w}</span>
+          ))}
+        </div>
+
+        <div className="cal-grid cal-days">
+          {cells.map((cell, i) =>
+            cell === null ? (
+              <span key={i} className="cal-empty" />
+            ) : (
+              <button
+                type="button"
+                key={i}
+                className={`cal-day${cell.key === value ? ' selected' : ''}${
+                  cell.key === today ? ' today' : ''
+                }`}
+                onClick={() => {
+                  onChange(cell.key);
+                  setOpen(false);
+                }}
+              >
+                {cell.day}
+                {markedDates?.has(cell.key) && <span className="cal-dot" />}
+              </button>
+            ),
+          )}
+        </div>
+
+        <button
+          type="button"
+          className="cal-today"
+          onClick={() => {
+            onChange(today);
+            setOpen(false);
+          }}
+        >
+          {t('cal.backToday')}
+        </button>
+      </Popover>
     </div>
   );
 }
