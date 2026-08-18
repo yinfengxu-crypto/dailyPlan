@@ -1,0 +1,16 @@
+services:
+  dailyplan:
+    build: .
+    container_name: dailyplan
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      # SQLite 数据库持久化到命名卷，容器重建不丢数据
+      - dailyplan-data:/app/data
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+
+volumes:
+  dailyplan-data:
