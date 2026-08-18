@@ -20,6 +20,10 @@ ENV npm_config_better_sqlite3_binary_host_mirror=$SQLITE_MIRROR
 # ===== 构建阶段 =====
 FROM base AS builder
 
+ENV NEXT_TELEMETRY_DISABLED=1
+# 限制 Node 堆内存峰值，配合服务器 swap 使用，避免被 OOM killer 误杀
+ENV NODE_OPTIONS=--max-old-space-size=2048
+
 COPY package.json package-lock.json ./
 RUN npm ci --no-audit --no-fund
 
